@@ -14,9 +14,10 @@ class Auth_model extends CI_Model {
 	 * @return : Array
 	 */
     public function get($where = array()){
-		$this->db->select('AUM.*');
-		$this->db->from('user_master AUM');
-		$this->db->where('AUM.user_email',$where['user_email']);
+		$this->db->select('UM.*');
+		$this->db->from('user_master UM');
+		$this->db->where('UM.user_email',$where['user_email']);
+		$this->db->where('UM.user_is_deleted','no');
 		$query = $this->db->get();
 		return $query->result();
 	}
@@ -24,9 +25,9 @@ class Auth_model extends CI_Model {
 	
 	
 	public function getUserByUserId($user_id = 0){
-		$this->db->select('UM.*');
-		$this->db->from('web_user_master UM');
-		$this->db->where('UM.user_id',$user_id);
+		$this->db->select('UMD.*');
+		$this->db->from('user_master_details UMD');
+		$this->db->where('UMD.user_id',$user_id);
 		$query = $this->db->get();
 		return $query->result();
 	}

@@ -34,6 +34,11 @@ class Auth extends CI_Controller {
         $this->methods['forgot_password_post']['limit'] = 500; // 100 requests per hour per user/key
         $this->methods['reset_password_post']['limit'] = 500; // 100 requests per hour per user/key
         $this->load->model('auth_model');
+        $this->load->library('session');
+    }
+
+    private function generatePasswordHash($plainPassword = 'Abcd@1234'){
+        return password_hash($plainPassword,PASSWORD_BCRYPT);
     }
 
     public function login_post(){
@@ -45,12 +50,12 @@ class Auth extends CI_Controller {
                 'user_email' => $this->post('email'),
                 'user_pwd' => $this->post('password'),
             ];
-            $retData = $this->_activation($postData);
+            $activeUserData = $this->_activation($postData);
             // Set the response and exit
             $responseData = [
-                'status' => $retData['status'],
-                'message' => $retData['msg'],
-                'data' => ($retData['status'] === 'success'?$postData:'')
+                'status' => $activeUserData['status'],
+                'message' => $activeUserData['msg'],
+                'data' => $activeUserData['data'],
             ];
             $retData = AUTHORIZATION::generateToken($responseData);
             $this->response($retData,  200); // OK (200) being the HTTP response code
@@ -71,7 +76,7 @@ class Auth extends CI_Controller {
         $userMasterData = $this->auth_model->get($userMasterForm);//checking with email & password
         $retData['status'] = '';
         $retData['msg'] = '';
-        $retData['category'] = '';
+        $retData['data'] = '';
         if(count($userMasterData) > 0){
             $data = $this->_checkActiveStatus($userMasterData, $userMasterForm);
             $retData['status'] = $data['status'];
@@ -81,16 +86,16 @@ class Auth extends CI_Controller {
             $retData['msg'] = "Invalid email id.";
         }
         if($retData['status'] != 'danger'){
-        	$retData['category'] = '';
-            // $this->_setSession($userMasterData);
+            $retData['data'] = $this->_setSession($userMasterData);
         }
         return $retData;
     }
 
     private function _checkActiveStatus($userMasterData = array(),$userMasterForm = array()){
-        $retData['status'] = '';
+        $retData['status'] = 'success';
         $retData['msg'] = '';
-        if(!password_verify($userMasterForm['user_pwd'],$userMasterData[0]->user_pwd)){
+        $retData['data'] = array();
+        if(!password_verify($userMasterForm['user_pwd'], $userMasterData[0]->user_pwd)){
         	$retData['status'] = 'danger';
         	$retData['msg'] = 'Password is wrong.';
         }elseif($userMasterData[0]->user_status == 'inactive'){
@@ -101,12 +106,17 @@ class Auth extends CI_Controller {
     }
 
     private function _setSession($userData = array()){
+        $dbData = $this->auth_model->getUserByUserId($userData[0]->user_id);//checking with email & password
         $this->session->set_userdata('user_id', $userData[0]->user_id);
         $this->session->set_userdata('email', $userData[0]->user_email);
-        $this->session->set_userdata('name', $userData[0]->name);
-        $this->session->set_userdata('user_category', '');
-        $this->session->set_userdata('user_status', $userData[0]->um_status);
+        $this->session->set_userdata('name', $dbData[0]->user_name);
+        // $this->session->set_userdata('user_category', '');
+        // $this->session->set_userdata('user_status', $userData[0]->um_status);
         
+        $data['user_id'] = $userData[0]->user_id;
+        $data['email'] = $userData[0]->user_email;
+        $data['name'] = $dbData[0]->user_name;
+        return $data;
     }
 
     public function forgot_password_post(){
