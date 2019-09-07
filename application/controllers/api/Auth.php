@@ -43,6 +43,11 @@ class Auth extends CI_Controller {
 
     public function login_post(){
         $this->load->library('form_validation');
+        $data = [
+            'email' => $this->post('email'),
+            'password' => $this->post('password'),
+        ];
+        $this->form_validation->set_data($data);
         $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
         $this->form_validation->set_rules('password', 'Password', 'trim|required');
         if ($this->form_validation->run() === TRUE){
@@ -57,17 +62,17 @@ class Auth extends CI_Controller {
                 'message' => $activeUserData['msg'],
                 'data' => $activeUserData['data'],
             ];
-            $retData = AUTHORIZATION::generateToken($responseData);
-            $this->response($retData,  200); // OK (200) being the HTTP response code
+            // $retData = AUTHORIZATION::generateToken($responseData);
+            $this->response($responseData,  200); // OK (200) being the HTTP response code
         }else{
             // Set the response and exit
             $responseData = [
                 'status' => 'danger',
                 'message' => validation_errors(),
-                'data' => '',
+                'data' => $this->post(),
             ];
-            $retData = AUTHORIZATION::generateToken($responseData);
-            $this->response($retData,  200); // OK (401) being the HTTP response code
+            // $retData = AUTHORIZATION::generateToken($responseData);
+            $this->response($responseData,  200); // OK (401) being the HTTP response code
         }
         
     }
