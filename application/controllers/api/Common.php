@@ -46,8 +46,8 @@ class Common extends CI_Controller {
             'message' => count($data) > 0?'':'No data please.',
             'data' => $data
         ];
-        $retData = AUTHORIZATION::generateToken($responseData);
-        $this->response($retData,  200); // OK (200) being the HTTP response code
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
     }
 
     public function state_list_get(){
@@ -61,8 +61,8 @@ class Common extends CI_Controller {
             'message' => count($data) > 0?'':'No data please.',
             'data' => $data
         ];
-        $retData = AUTHORIZATION::generateToken($responseData);
-        $this->response($retData,  200); // OK (200) being the HTTP response code
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
     }
 
     public function city_list_get(){
