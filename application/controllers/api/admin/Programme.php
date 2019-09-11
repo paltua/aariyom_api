@@ -53,14 +53,16 @@ class Programme extends CI_Controller {
 
     public function add_post(){
         $this->load->library('form_validation');
+        $data = [
+            'program_title' => $this->post('program_title'),
+            'program_desc' => $this->post('program_desc'),
+            'created_by'=>$this->post('created_by'),
+        ];
+        $this->form_validation->set_data($data);
         $this->form_validation->set_rules('program_title', 'Title', 'trim|required');
-        $this->form_validation->set_rules('programe_desc', 'Description', 'trim|required');
+        $this->form_validation->set_rules('program_desc', 'Description', 'trim|required');
         if ($this->form_validation->run() === TRUE){
-            $postData = [
-                'program_title' => $this->post('program_title'),
-                'programe_desc' => $this->post('programe_desc'),
-                'created_by'=>$this->post('created_by'),
-            ];
+            $postData = $data;
             $insertId = $this->tbl_generic_model->add('programs', $postData);
             // Set the response and exit
             if($insertId > 0){
@@ -96,17 +98,48 @@ class Programme extends CI_Controller {
 
     public function update_post(){
         // India 96
-        $where['country_id'] = $this->uri->segment(4);
-        $select = '*';
-        $orderBy['name'] = 'ASC';
-        $data = $this->tbl_generic_model->get('regions',$select, $where, $orderBy);
-        $responseData = [
-            'status' => 'success',
-            'message' => count($data) > 0?'':'No data please.',
-            'data' => $data
+        $this->load->library('form_validation');
+        $data = [
+            'program_title' => $this->post('program_title'),
+            'program_desc' => $this->post('program_desc'),
+            'created_by'=>$this->post('created_by'),
         ];
-        // $retData = AUTHORIZATION::generateToken($responseData);
-        $this->response($responseData,  200); // OK (200) being the HTTP response code
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules('program_title', 'Title', 'trim|required');
+        $this->form_validation->set_rules('program_desc', 'Description', 'required');
+        if ($this->form_validation->run() === TRUE){
+            $postData = $data;
+            $insertId = $this->tbl_generic_model->add('programs', $postData);
+            // Set the response and exit
+            if($insertId > 0){
+                $responseData = [
+                    'status' => 'success',
+                    'message' => 'Added successfully.',
+                    'data' => []
+                ];
+                // $retData = AUTHORIZATION::generateToken($responseData);
+                $this->response($responseData,  200); // OK (200) being the HTTP response code
+            }else{
+                // Set the response and exit
+                $responseData = [
+                    'status' => 'danger',
+                    'message' => 'Sorry! Please try again.',
+                    'data' => [],
+                ];
+                // $retData = AUTHORIZATION::generateToken($responseData);
+                $this->response($responseData,  200); // OK (401) being the HTTP response code
+            }
+            
+        }else{
+            // Set the response and exit
+            $responseData = [
+                'status' => 'danger',
+                'message' => validation_errors(),
+                'data' => '',
+            ];
+            // $retData = AUTHORIZATION::generateToken($responseData);
+            $this->response($responseData,  200); // OK (401) being the HTTP response code
+        }
     }
 
     public function single_post(){

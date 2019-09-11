@@ -30,9 +30,11 @@ class Event extends CI_Controller {
 
         // Configure limits on our controller methods
         // Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
-        $this->methods['login_post']['limit'] = 500; // 500 requests per hour per user/key
-        $this->methods['forgot_password_post']['limit'] = 500; // 100 requests per hour per user/key
-        $this->methods['reset_password_post']['limit'] = 500; // 100 requests per hour per user/key
+        $this->methods['insert_post']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['update_post']['limit'] = 500; // 100 requests per hour per user/key
+        $this->methods['single_get']['limit'] = 500; // 100 requests per hour per user/key
+        $this->methods['listing_post']['limit'] = 500; // 100 requests per hour per user/key
+        
         $this->load->model('tbl_generic_model');
     }
 
