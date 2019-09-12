@@ -21,7 +21,7 @@ require APPPATH . 'libraries/Format.php';
  */
 class Programme extends CI_Controller {
     use REST_Controller { REST_Controller::__construct as private __resTraitConstruct; }
-
+    public $table = '';
     function __construct()
     {
         // Construct the parent class
@@ -32,16 +32,17 @@ class Programme extends CI_Controller {
         // Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
         $this->methods['add_post']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['update_post']['limit'] = 500; // 100 requests per hour per user/key
-        $this->methods['single_post']['limit'] = 500; // 100 requests per hour per user/key
+        $this->methods['single_get']['limit'] = 500; // 100 requests per hour per user/key
         $this->methods['list_post']['limit'] = 500; // 100 requests per hour per user/key
         $this->load->model('tbl_generic_model');
+        $this->table = 'programs';
     }
 
     public function list_post(){
         $where = array();
         $select = '*';
         $orderBy['program_id'] = 'DESC';
-        $data = $this->tbl_generic_model->get('programs',$select, $where, $orderBy);
+        $data = $this->tbl_generic_model->get($this->table,$select, $where, $orderBy);
         $responseData = [
             'status' => 'success',
             'message' => count($data) > 0?'':'No data please.',
@@ -63,7 +64,7 @@ class Programme extends CI_Controller {
         $this->form_validation->set_rules('program_desc', 'Description', 'trim|required');
         if ($this->form_validation->run() === TRUE){
             $postData = $data;
-            $insertId = $this->tbl_generic_model->add('programs', $postData);
+            $insertId = $this->tbl_generic_model->add($this->table, $postData);
             // Set the response and exit
             if($insertId > 0){
                 $responseData = [
@@ -109,7 +110,7 @@ class Programme extends CI_Controller {
         $this->form_validation->set_rules('program_desc', 'Description', 'required');
         if ($this->form_validation->run() === TRUE){
             $postData = $data;
-            $insertId = $this->tbl_generic_model->add('programs', $postData);
+            $insertId = $this->tbl_generic_model->add($this->table, $postData);
             // Set the response and exit
             if($insertId > 0){
                 $responseData = [
@@ -142,12 +143,12 @@ class Programme extends CI_Controller {
         }
     }
 
-    public function single_post(){
+    public function single_get(){
         // West Bengal 1627
-        $where['region_id'] = $this->uri->segment(4);
+        $where['program_id'] = $this->uri->segment(5);
         $select = '*';
-        $orderBy['name'] = 'ASC';
-        $data = $this->tbl_generic_model->get('cities',$select, $where, $orderBy);
+        $orderBy = [];
+        $data = $this->tbl_generic_model->get($this->table,$select, $where, $orderBy);
         $responseData = [
             'status' => 'success',
             'message' => count($data) > 0?'':'No data please.',
