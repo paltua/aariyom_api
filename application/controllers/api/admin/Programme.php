@@ -1,6 +1,8 @@
 <?php
+
 use Restserver\Libraries\REST_Controller;
-defined('BASEPATH') OR exit('No direct script access allowed');
+
+defined('BASEPATH') or exit('No direct script access allowed');
 
 // This can be removed if you use __autoload() in config.php OR use Modular Extensions
 /** @noinspection PhpIncludeInspection */
@@ -19,8 +21,11 @@ require APPPATH . 'libraries/Format.php';
  * @license         MIT
  * @link            https://github.com/chriskacerguis/codeigniter-restserver
  */
-class Programme extends CI_Controller {
-    use REST_Controller { REST_Controller::__construct as private __resTraitConstruct; }
+class Programme extends CI_Controller
+{
+    use REST_Controller {
+        REST_Controller::__construct as private __resTraitConstruct;
+    }
     public $table = '';
     function __construct()
     {
@@ -34,39 +39,46 @@ class Programme extends CI_Controller {
         $this->methods['update_post']['limit'] = 500; // 100 requests per hour per user/key
         $this->methods['single_get']['limit'] = 500; // 100 requests per hour per user/key
         $this->methods['list_post']['limit'] = 500; // 100 requests per hour per user/key
+        $this->methods['delete_get']['limit'] = 500; // 100 requests per hour per user/key
         $this->load->model('tbl_generic_model');
+        $this->load->model('programme_model');
         $this->table = 'programs';
     }
 
-    public function list_post(){
-        $where = array();
-        $select = '*';
-        $orderBy['program_id'] = 'DESC';
-        $data = $this->tbl_generic_model->get($this->table,$select, $where, $orderBy);
+    public function list_post()
+    {
+        $postData = $this->post();
+        $data = $this->programme_model->admin_list($postData);
+        $pagingData = [
+            'recordsTotal' => $this->programme_model->admin_list_count(),
+            'recordsFiltered' => $this->programme_model->admin_list_filter_count($postData),
+            'list' => $data
+        ];
         $responseData = [
             'status' => 'success',
-            'message' => count($data) > 0?'':'No data please.',
-            'data' => $data
+            'message' => '',
+            'data' => $pagingData
         ];
         // $retData = AUTHORIZATION::generateToken($responseData);
         $this->response($responseData,  200); // OK (200) being the HTTP response code
     }
 
-    public function add_post(){
+    public function add_post()
+    {
         $this->load->library('form_validation');
         $data = [
             'program_title' => $this->post('program_title'),
             'program_desc' => $this->post('program_desc'),
-            'created_by'=>$this->post('created_by'),
+            'created_by' => $this->post('created_by'),
         ];
         $this->form_validation->set_data($data);
         $this->form_validation->set_rules('program_title', 'Title', 'trim|required');
         $this->form_validation->set_rules('program_desc', 'Description', 'trim|required');
-        if ($this->form_validation->run() === TRUE){
+        if ($this->form_validation->run() === TRUE) {
             $postData = $data;
             $insertId = $this->tbl_generic_model->add($this->table, $postData);
             // Set the response and exit
-            if($insertId > 0){
+            if ($insertId > 0) {
                 $responseData = [
                     'status' => 'success',
                     'message' => 'Added successfully.',
@@ -74,7 +86,7 @@ class Programme extends CI_Controller {
                 ];
                 // $retData = AUTHORIZATION::generateToken($responseData);
                 $this->response($responseData,  200); // OK (200) being the HTTP response code
-            }else{
+            } else {
                 // Set the response and exit
                 $responseData = [
                     'status' => 'danger',
@@ -84,8 +96,7 @@ class Programme extends CI_Controller {
                 // $retData = AUTHORIZATION::generateToken($responseData);
                 $this->response($responseData,  200); // OK (401) being the HTTP response code
             }
-            
-        }else{
+        } else {
             // Set the response and exit
             $responseData = [
                 'status' => 'danger',
@@ -97,30 +108,32 @@ class Programme extends CI_Controller {
         }
     }
 
-    public function update_post(){
+    public function update_post()
+    {
         // India 96
         $this->load->library('form_validation');
         $data = [
             'program_title' => $this->post('program_title'),
             'program_desc' => $this->post('program_desc'),
-            'created_by'=>$this->post('created_by'),
+            'created_by' => $this->post('created_by'),
         ];
         $this->form_validation->set_data($data);
         $this->form_validation->set_rules('program_title', 'Title', 'trim|required');
         $this->form_validation->set_rules('program_desc', 'Description', 'required');
-        if ($this->form_validation->run() === TRUE){
+        if ($this->form_validation->run() === TRUE) {
             $postData = $data;
-            $insertId = $this->tbl_generic_model->add($this->table, $postData);
+            $where['program_id'] = $this->post('editId');
+            $updateStatus = $this->tbl_generic_model->edit($this->table, $postData, $where);
             // Set the response and exit
-            if($insertId > 0){
+            if ($where['program_id'] > 0 && $updateStatus) {
                 $responseData = [
                     'status' => 'success',
-                    'message' => 'Added successfully.',
+                    'message' => 'Updated successfully.',
                     'data' => []
                 ];
                 // $retData = AUTHORIZATION::generateToken($responseData);
                 $this->response($responseData,  200); // OK (200) being the HTTP response code
-            }else{
+            } else {
                 // Set the response and exit
                 $responseData = [
                     'status' => 'danger',
@@ -130,12 +143,12 @@ class Programme extends CI_Controller {
                 // $retData = AUTHORIZATION::generateToken($responseData);
                 $this->response($responseData,  200); // OK (401) being the HTTP response code
             }
-            
-        }else{
+        } else {
             // Set the response and exit
             $responseData = [
                 'status' => 'danger',
-                'message' => validation_errors(),
+                // 'message' => validation_errors(),
+                'message' => json_encode($this->post()),
                 'data' => '',
             ];
             // $retData = AUTHORIZATION::generateToken($responseData);
@@ -143,19 +156,47 @@ class Programme extends CI_Controller {
         }
     }
 
-    public function single_get(){
+    public function single_get()
+    {
         // West Bengal 1627
         $where['program_id'] = $this->uri->segment(5);
         $select = '*';
         $orderBy = [];
-        $data = $this->tbl_generic_model->get($this->table,$select, $where, $orderBy);
+        $data = $this->tbl_generic_model->get($this->table, $select, $where, $orderBy);
         $responseData = [
             'status' => 'success',
-            'message' => count($data) > 0?'':'No data please.',
+            'message' => count($data) > 0 ? '' : 'No data please.',
             'data' => $data
         ];
         // $retData = AUTHORIZATION::generateToken($responseData);
         $this->response($responseData,  200); // OK (200) being the HTTP response code
     }
 
+    public function delete_get()
+    {
+        $postData = [
+            'is_deleted' => 'yes'
+        ];
+        $where['program_id'] = $this->uri->segment(5);
+        $updateStatus = $this->tbl_generic_model->edit($this->table, $postData, $where);
+        // Set the response and exit
+        if ($where['program_id'] > 0 && $updateStatus) {
+            $responseData = [
+                'status' => 'success',
+                'message' => 'Deleted successfully.',
+                'data' => []
+            ];
+            // $retData = AUTHORIZATION::generateToken($responseData);
+            $this->response($responseData,  200); // OK (200) being the HTTP response code
+        } else {
+            // Set the response and exit
+            $responseData = [
+                'status' => 'danger',
+                'message' => 'Sorry! Please try again.',
+                'data' => [],
+            ];
+            // $retData = AUTHORIZATION::generateToken($responseData);
+            $this->response($responseData,  200); // OK (401) being the HTTP response code
+        }
+    }
 }
