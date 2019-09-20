@@ -51,23 +51,35 @@ class Event extends CI_Controller
         $data = [
             'event_title' => $this->post('event_title'),
             'event_long_desc' => $this->post('event_long_desc'),
-            'event_created_by' => $this->post('event_created_by'),
             'event_about' => $this->post('event_about'),
             'event_objectives' => $this->post('event_objectives'),
-            'event_start_date_time' => $this->post('event_start_date_time'),
-            'event_end_date_time' => $this->post('event_end_date_time'),
-            'event_code' => $this->post('event_code'),
+            'event_start_date' => $this->post('event_start_date'),
+            'event_end_date' => $this->post('event_end_date'),
+            'programs' => $this->post('programs'),
+            'country_id' => $this->post('country_id'),
+            'region_id' => $this->post('region_id'),
+            'address' => $this->post('address'),
+            'pin' => $this->post('pin'),
         ];
         $this->form_validation->set_data($data);
         $this->form_validation->set_rules('event_title', 'Title', 'trim|required');
+        $this->form_validation->set_rules('programs', 'Programs', 'trim|required');
+        $this->form_validation->set_rules('event_start_date', 'Start Date', 'trim|required');
+        $this->form_validation->set_rules('event_end_date', 'End Date', 'trim|required');
         $this->form_validation->set_rules('event_long_desc', 'Description', 'trim|required');
         $this->form_validation->set_rules('event_about', 'About of Event', 'trim|required');
         $this->form_validation->set_rules('event_objectives', 'Event objectives', 'trim|required');
-        $this->form_validation->set_rules('event_start_date_time', 'Start Date', 'trim|required');
-        $this->form_validation->set_rules('event_end_date_time', 'End Date', 'trim|required');
-
+        $this->form_validation->set_rules('country_id', 'Country', 'trim|required');
+        $this->form_validation->set_rules('region_id', 'State', 'trim|required');
+        $this->form_validation->set_rules('address', 'Address(Street/Road/House No)', 'trim|required');
+        $this->form_validation->set_rules('pin', 'Pin', 'trim|required');
+        $postData = $data;
         if ($this->form_validation->run() === TRUE) {
-            $postData = $data;
+
+
+            $postData['city_id'] = $this->post('city_id');
+            $postData['event_created_by'] = $this->post('event_created_by');
+
             $insertId = $this->tbl_generic_model->add($this->table, $postData);
             // Set the response and exit
             if ($insertId > 0) {
@@ -89,11 +101,20 @@ class Event extends CI_Controller
                 $this->response($responseData,  200); // OK (401) being the HTTP response code
             }
         } else {
+
+            $startDate = $this->post('event_start_date');
+            $endDate = $this->post('event_end_date');
+            $stime = $this->post('event_start_time');
+            $etime = $this->post('event_end_time');
+            $sdt = $startDate['year'] . '-' . $startDate['month'] . '-' . $startDate['day'] . ' ' . $stime['hour'] . ':' . $stime['minute'] . ':00';
+            $edt = $endDate['year'] . '-' . $endDate['month'] . '-' . $endDate['day'] . ' ' . $etime['hour'] . ':' . $etime['minute'] . ':00';
+            $postData['event_start_date_time'] = date_format(new DateTime($sdt), 'Y-m-d H:i:s');
+            $postData['event_end_date_time'] = date_format(new DateTime($edt), 'Y-m-d H:i:s');
             // Set the response and exit
             $responseData = [
                 'status' => 'danger',
                 'message' => validation_errors(),
-                'data' => '',
+                'data' => $postData,
             ];
             // $retData = AUTHORIZATION::generateToken($responseData);
             $this->response($responseData,  200); // OK (401) being the HTTP response code
