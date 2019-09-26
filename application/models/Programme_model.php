@@ -18,7 +18,7 @@ class Programme_model extends CI_Model
         $this->db->join('user_master_details UMD', 'UMD.user_id=UM.user_id', 'inner');
         $this->db->where('PROG.is_deleted', 'no');
         $this->whereAndLimit($postData);
-        if ($postData['draw'] === 0) {
+        if ($postData['draw'] === 1) {
             $this->db->order_by('PROG.program_id', 'DESC');
             $this->db->limit(10, $postData['start']);
         } else {
