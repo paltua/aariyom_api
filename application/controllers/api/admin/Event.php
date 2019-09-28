@@ -415,7 +415,7 @@ class Event extends CI_Controller
         $this->load->library('upload', $config);
         $retData = [];
         if (!$this->upload->do_upload('event_image')) {
-            $retData['error'] = array('error' => $this->upload->display_errors());
+            $retData['error'] = $this->upload->display_errors();
             $retData['data'] = $this->upload->data();
         } else {
             $retData['data'] = $this->upload->data();
