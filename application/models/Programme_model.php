@@ -65,4 +65,13 @@ class Programme_model extends CI_Model
         $this->db->where('PROG.is_deleted', 'no');
         return $this->db->count_all_results();
     }
+
+    public function getDataForHome()
+    {
+        $this->db->select('PROG.*');
+        $this->db->from('programs PROG');
+        $this->db->where('PROG.is_deleted', 'no');
+        $this->db->limit(3);
+        return $this->db->get()->result();
+    }
 }
