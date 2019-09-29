@@ -48,6 +48,24 @@ class Fu extends CI_Controller
         $this->table = 'event_master';
     }
 
+    public function list_post()
+    {
+        $postData = $this->post();
+        $data = $this->fu_model->admin_list($postData);
+        $pagingData = [
+            'recordsTotal' => $this->fu_model->admin_list_count(),
+            'recordsFiltered' => $this->fu_model->admin_list_filter_count($postData),
+            'list' => $data
+        ];
+        $responseData = [
+            'status' => 'success',
+            'message' => '',
+            'data' => $pagingData
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
     public function add_post()
     {
         $this->load->library('form_validation');
@@ -55,37 +73,33 @@ class Fu extends CI_Controller
         $this->form_validation->set_data($this->data);
         $this->form_validation->set_rules('fu_title', 'Title', 'trim|required');
         $this->form_validation->set_rules('fu_desc', 'Description', 'trim|required');
-        // $this->form_validation->set_rules('fu_image_name_valid', 'Image', 'trim|required');
+        // $this->form_validation->set_rules('fu_image_name', 'Image', 'trim|required');
         if ($this->form_validation->run() === TRUE) {
-            $fu_id = 1; //$this->_eventMasterDataAdd();
+            $fData = $this->do_upload();
             // Set the response and exit
-            if ($fu_id > 0) {
-                $fData = $this->do_upload($fu_id);
-                if ($fData['error'] === "") {
-                    $responseData = [
-                        'status' => 'success',
-                        'message' => 'Added successfully.',
-                        'data' => $_FILES
-                    ];
-                } else {
-                    $responseData = [
-                        'status' => 'warning',
-                        'message' => 'Added successfully.But Image is not updated.Error as below.' . $fData['error'],
-                        'data' => $_FILES
-                    ];
-                }
-                // $retData = AUTHORIZATION::generateToken($responseData);
-                $this->response($responseData,  200); // OK (200) being the HTTP response code
+            if ($fData['error'] === "") {
+                $inData['fu_title'] = $inLogData['fu_title'] = $this->data['fu_title'];
+                $inData['fu_desc'] = $inLogData['fu_desc'] = $this->data['fu_desc'];
+                // $inData['fu_objectives'] = $inLogData['fu_objectives'] = $this->data['fu_objectives'];
+                $inData['fu_image'] = $inLogData['fu_image'] = $fData['data']['file_name'];
+                $inLogData['fu_created_by'] = $this->data['fu_created_by'];
+                $fu_id = $this->tbl_generic_model->add('functional_units', $inData);
+                $inLogData['fu_id'] = $fu_id;
+                $this->tbl_generic_model->add('functional_units_log', $inLogData);
+                $responseData = [
+                    'status' => 'success',
+                    'message' => 'Added successfully.',
+                    'data' => []
+                ];
             } else {
-                // Set the response and exit
                 $responseData = [
                     'status' => 'danger',
-                    'message' => 'Sorry! Please try again.',
-                    'data' => [],
+                    'message' => $fData['error'],
+                    'data' => $_FILES
                 ];
-                // $retData = AUTHORIZATION::generateToken($responseData);
-                $this->response($responseData,  200); // OK (401) being the HTTP response code
             }
+            // $retData = AUTHORIZATION::generateToken($responseData);
+            $this->response($responseData,  200); // OK (200) being the HTTP response code
         } else {
             // Set the response and exit
             $responseData = [
@@ -98,10 +112,10 @@ class Fu extends CI_Controller
         }
     }
 
-    public function do_upload($fu_id = 0)
+    public function do_upload()
     {
         $config['upload_path']          = './images/fus/';
-        $new_name                   = $fu_id . '_' . time() . '.' . pathinfo($_FILES["fu_image_name"]['name'], PATHINFO_EXTENSION);
+        $new_name                   = time() . '.' . pathinfo($_FILES["fu_image_name"]['name'], PATHINFO_EXTENSION);
         $config['file_name']        = $new_name;
         $config['allowed_types']        = 'jpeg|gif|jpg|png';
         // $config['max_size']             = 1024;
@@ -117,5 +131,89 @@ class Fu extends CI_Controller
             $retData['error'] = '';
         }
         return $retData;
+    }
+
+    public function single_get()
+    {
+        $fu_id = $this->uri->segment(5);
+        $data = $this->fu_model->getSingle($fu_id);
+        $responseData = [
+            'status' => 'success',
+            'message' => count($data) > 0 ? '' : 'No data please.',
+            'data' => $data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function update_post()
+    {
+        $this->load->library('form_validation');
+        $this->data = $this->post();
+        $this->form_validation->set_data($this->data);
+        $this->form_validation->set_rules('fu_title', 'Title', 'trim|required');
+        $this->form_validation->set_rules('fu_desc', 'Description', 'trim|required');
+        if ($this->form_validation->run() === TRUE) {
+            $inData = array();
+            $fData['error'] = '';
+            if ($_FILES) {
+                $fData = $this->do_upload();
+                $inData['fu_image'] = $inLogData['fu_image'] = $fData['data']['file_name'];
+            } else {
+                $inLogData['fu_image'] = $this->data['old_image_name'];
+            }
+
+            // Set the response and exit
+            if ($fData['error'] === "") {
+                $whereData['fu_id'] = $fu_id = $this->data['fu_id'];
+                $inData['fu_title'] = $inLogData['fu_title'] = $this->data['fu_title'];
+                $inData['fu_desc'] = $inLogData['fu_desc'] = $this->data['fu_desc'];
+                $inLogData['fu_created_by'] = $this->data['fu_created_by'];
+                $this->tbl_generic_model->edit('functional_units', $inData, $whereData);
+                $inLogData['fu_id'] = $fu_id;
+                $this->tbl_generic_model->add('functional_units_log', $inLogData);
+                if ($this->data['old_image_name'] !== '') {
+                    $this->tbl_generic_model->unlinkImage('./images/fus/' . $this->data['old_image_name']);
+                }
+                $responseData = [
+                    'status' => 'success',
+                    'message' => 'Updated successfully.',
+                    'data' => []
+                ];
+            } else {
+                $responseData = [
+                    'status' => 'danger',
+                    'message' => $fData['error'],
+                    'data' => $_FILES
+                ];
+            }
+            // $retData = AUTHORIZATION::generateToken($responseData);
+            $this->response($responseData,  200); // OK (200) being the HTTP response code
+        } else {
+            // Set the response and exit
+            $responseData = [
+                'status' => 'danger',
+                'message' => validation_errors(),
+                'data' => [],
+            ];
+            // $retData = AUTHORIZATION::generateToken($responseData);
+            $this->response($responseData,  200); // OK (401) being the HTTP response code
+        }
+    }
+
+    public function delete_get()
+    {
+        $fu_id = $this->uri->segment(5);
+        $data = [
+            'fu_is_deleted' => 'yes'
+        ];
+        $updateStatus = $this->tbl_generic_model->edit('functional_units', $data, array('fu_id' => $fu_id));
+        $responseData = [
+            'status' => 'success',
+            'message' => 'Deleted successfully.',
+            'data' => []
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
     }
 }

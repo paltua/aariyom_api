@@ -225,4 +225,13 @@ class Tbl_generic_model extends CI_Model
         $this->db->order_by('name', 'ASC');
         return $this->db->get()->result();
     }
+
+    public function unlinkImage($path = '')
+    {
+        if ($path !== '') {
+            $actualImagePath = $path; //base_url($path);
+            unlink($actualImagePath);
+        }
+        return true;
+    }
 }
