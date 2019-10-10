@@ -37,6 +37,7 @@ class Home extends CI_Controller
         // Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
         $this->methods['index_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['get_event_all_get']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['get_event_details_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->load->model('tbl_generic_model');
         $this->load->model('event_model');
         $this->load->model('fu_model');
@@ -60,7 +61,21 @@ class Home extends CI_Controller
 
     public function get_event_all_get()
     {
-        $this->data['list'] = $this->event_model->getEventForEvent();
+        $this->data['list'] = $this->event_model->getDataForEvent();
+        $responseData = [
+            'status' => 'success',
+            'message' => '',
+            'data' => $this->data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function get_event_details_get()
+    {
+        $event_id = $this->uri->segment(4);
+        $this->data['details'] = $this->event_model->getEventDetails($event_id);
+        $this->data['images'] = $this->event_model->getImages($event_id);
         $responseData = [
             'status' => 'success',
             'message' => '',

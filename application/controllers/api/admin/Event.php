@@ -27,7 +27,7 @@ class Event extends CI_Controller
         REST_Controller::__construct as private __resTraitConstruct;
     }
     public $data = array();
-
+    public $imagePath = './images/events/';
     function __construct()
     {
         // Construct the parent class
@@ -43,6 +43,8 @@ class Event extends CI_Controller
         $this->methods['delete_get']['limit'] = 500; // 100 requests per hour per user/key
         $this->methods['image_upload_post']['limit'] = 500; // 100 requests per hour per user/key
         $this->methods['image_list_get']['limit'] = 500; // 100 requests per hour per user/key
+        $this->methods['image_list_default_get']['limit'] = 500; // 100 requests per hour per user/key
+        $this->methods['delete_image_get']['limit'] = 500; // 100 requests per hour per user/key
         $this->load->model('tbl_generic_model');
         $this->load->model('event_model');
         $this->table = 'event_master';
@@ -374,9 +376,11 @@ class Event extends CI_Controller
         // $fData = $_FILES;
         $fData = $this->do_upload($event_id);
         if ($fData['error'] === "") {
+            $this->updateDefaultImage($event_id);
             $addData['event_id'] = $event_id;
             $addData['ei_image_name'] = $fData['data']['file_name'];
             $addData['created_by'] = $created_by;
+            $addData['is_default'] = '1';
             $insertId = $this->tbl_generic_model->add('event_images', $addData);
             if ($insertId > 0) {
                 $responseData = [
@@ -405,7 +409,7 @@ class Event extends CI_Controller
 
     public function do_upload($event_id = 0)
     {
-        $config['upload_path']          = './images/events/';
+        $config['upload_path']          = $this->imagePath;
         $new_name                   = $event_id . '_' . time() . '.' . pathinfo($_FILES["event_image"]['name'], PATHINFO_EXTENSION);
         $config['file_name']        = $new_name;
         $config['allowed_types']        = 'jpeg|gif|jpg|png';
@@ -422,6 +426,76 @@ class Event extends CI_Controller
             $retData['error'] = '';
         }
         return $retData;
+    }
+
+    public function image_list_default_get()
+    {
+        $event_id = $this->uri->segment(5);
+        $ei_id = $this->uri->segment(6);
+        $this->updateDefaultImage($event_id);
+        $updateEventData['is_default'] = '1';
+        $updateWhereData['event_id'] = $event_id;
+        $updateWhereData['ei_id'] = $ei_id;
+        $this->tbl_generic_model->edit('event_images', $updateEventData, $updateWhereData);
+        $responseData = [
+            'status' => 'success',
+            'message' => 'Successfully updated default Image.',
+            'data' => ''
+        ];
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    private function updateDefaultImage($event_id = 0)
+    {
+        $updateEventData['is_default'] = '0';
+        $updateWhereData['event_id'] = $event_id;
+        $this->tbl_generic_model->edit('event_images', $updateEventData, $updateWhereData);
+    }
+
+    public function delete_image_get()
+    {
+        $event_id = $this->uri->segment(5);
+        $ei_id = $this->uri->segment(6);
+        $responseData = [
+            'status' => 'success',
+            'message' => '',
+            'data' => ''
+        ];
+        if ($event_id > 0 && $ei_id > 0) {
+            $where['event_id'] = $event_id;
+            $where['ei_id'] = $ei_id;
+            $data = $this->tbl_generic_model->get('event_images', '*', $where);
+            if (count($data) > 0) {
+                if ($data[0]->ei_image_name !== '') {
+                    $this->tbl_generic_model->unlinkImage($this->imagePath . $data[0]->ei_image_name);
+                    $this->tbl_generic_model->delete('event_images', $where);
+                    $responseData = [
+                        'status' => 'success',
+                        'message' => 'Successfully Deleted the Image.',
+                        'data' => ''
+                    ];
+                } else {
+                    $responseData = [
+                        'status' => 'warning',
+                        'message' => 'Sorry! No Image path is found.',
+                        'data' => ''
+                    ];
+                }
+            } else {
+                $responseData = [
+                    'status' => 'warning',
+                    'message' => 'Sorry! No Data found.',
+                    'data' => ''
+                ];
+            }
+        } else {
+            $responseData = [
+                'status' => 'warning',
+                'message' => 'Sorry! No Image is selected.',
+                'data' => ''
+            ];
+        }
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
     }
 
     private function verify_request()
