@@ -39,6 +39,7 @@ class Common extends CI_Controller
         $this->methods['state_list_get']['limit'] = 1000; // 100 requests per hour per user/key
         $this->methods['city_list_get']['limit'] = 1000; // 100 requests per hour per user/key
         $this->methods['programme_list_get']['limit'] = 1000;
+        $this->methods['dashboard_details_get']['limit'] = 1000;
         $this->load->model('tbl_generic_model');
     }
 
@@ -92,10 +93,45 @@ class Common extends CI_Controller
     public function programme_list_get()
     {
         // India 96
-        $where = [];
+        $where['is_deleted'] = 'no';
         $select = '*';
         $orderBy['program_title'] = 'ASC';
         $data = $this->tbl_generic_model->get('programs', $select, $where, $orderBy);
+        $responseData = [
+            'status' => 'success',
+            'message' => count($data) > 0 ? '' : 'No data please.',
+            'data' => $data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function dashboard_details_get()
+    {
+        $data[0] = [];
+        $where['is_deleted'] = 'no';
+        $data[0]['label'] = 'Programs';
+        $data[0]['bgClass'] = 'primary';
+        $data[0]['icon'] = 'fa-comments';
+        $data[0]['url'] = '/admin/programs';
+        $data[0]['count'] = $this->tbl_generic_model->countWhere('programs', $where);
+        $where = [];
+        $where['event_is_deleted'] = 'no';
+        $data[1]['label'] = 'Events';
+        $data[1]['bgClass'] = 'warning';
+        $data[1]['icon'] = 'fa-tasks';
+        $data[1]['url'] = '/admin/events';
+        $data[1]['count'] = $this->tbl_generic_model->countWhere('event_master', $where);
+        $where = [];
+        $where['fu_is_deleted'] = 'no';
+        $data[2]['label'] = 'Functional Units';
+        $data[2]['bgClass'] = 'success';
+        $data[2]['icon'] = 'fa-shopping-cart';
+        $data[2]['url'] = '/admin/functional-units';
+        $data[2]['count'] = $this->tbl_generic_model->countWhere('functional_units', $where);
+        // $where = [];
+        // $where['is_deleted'] = 'no';
+        // $programs = $this->tbl_generic_model->countWhere('programs', $where);
         $responseData = [
             'status' => 'success',
             'message' => count($data) > 0 ? '' : 'No data please.',
