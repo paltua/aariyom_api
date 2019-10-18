@@ -4,15 +4,17 @@ class Programme_model extends CI_Model
 {
 
     public $table = '';
+    public $image_url;
     function __construct()
     {
         // parent::__construct();
         $this->table = 'programs';
+        $this->image_url = base_url('images/programs/');
     }
 
     public function admin_list($postData = [])
     {
-        $this->db->select('PROG.*, UMD.user_name');
+        $this->db->select('PROG.*,CONCAT("' . $this->image_url . '",IF(PROG.program_image!="",PROG.program_image,"no-image.png")) image_path, UMD.user_name');
         $this->db->from('programs PROG');
         $this->db->join('user_master UM', 'UM.user_id=PROG.created_by', 'inner');
         $this->db->join('user_master_details UMD', 'UMD.user_id=UM.user_id', 'inner');
@@ -66,9 +68,18 @@ class Programme_model extends CI_Model
         return $this->db->count_all_results();
     }
 
+    public function geSingle($program_id = 0)
+    {
+        $this->db->select('PROG.*,CONCAT("' . $this->image_url . '",IF(PROG.program_image!="",PROG.program_image,"no-image.png")) image_path');
+        $this->db->from('programs PROG');
+        $this->db->where('PROG.is_deleted', 'no');
+        $this->db->where('PROG.program_id', $program_id);
+        return $this->db->get()->result();
+    }
+
     public function getDataForHome()
     {
-        $this->db->select('PROG.*');
+        $this->db->select('PROG.*,CONCAT("' . $this->image_url . '",IF(PROG.program_image!="",PROG.program_image,"no-image.png")) image_path');
         $this->db->from('programs PROG');
         $this->db->where('PROG.is_deleted', 'no');
         $this->db->limit(3);
