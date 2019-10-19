@@ -85,4 +85,13 @@ class Programme_model extends CI_Model
         $this->db->limit(3);
         return $this->db->get()->result();
     }
+
+    public function getData()
+    {
+        $this->db->select('PROG.*,CONCAT("' . $this->image_url . '",IF(PROG.program_image!="",PROG.program_image,"no-image.png")) image_path');
+        $this->db->from('programs PROG');
+        $this->db->where('PROG.is_deleted', 'no');
+        $this->db->order_by('PROG.program_id', 'DESC');
+        return $this->db->get()->result();
+    }
 }

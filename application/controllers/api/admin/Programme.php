@@ -141,7 +141,7 @@ class Programme extends CI_Controller
                 $postData['program_image'] = $this->post('old_program_image');
             }
             if ($fData['error'] === "") {
-                $where['program_id'] = $this->post('editId');
+                $where['program_id'] = $this->post('program_id');
                 $updateStatus = $this->tbl_generic_model->edit($this->table, $postData, $where);
                 // Set the response and exit
                 if ($where['program_id'] > 0 && $updateStatus) {

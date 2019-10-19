@@ -102,7 +102,7 @@ class Event_model extends CI_Model
 
     public function getDataForHome()
     {
-        $this->db->select('EM.event_id,EM.event_title,EM.event_start_date_time,EM.event_end_date_time');
+        $this->db->select('EM.event_id,EM.event_title,EM.event_long_desc,EM.event_start_date_time,EM.event_end_date_time');
         $this->db->select_min('EL.address', 'address');
         $this->db->select_min('EL.pin', 'pin');
         $this->db->select_min('C.name', 'c_name');
@@ -119,11 +119,13 @@ class Event_model extends CI_Model
         $this->db->join('programs PRO', 'PRO.program_id = EPRR.program_id AND PRO.is_deleted = "no"', 'LEFT');
         $this->db->join('event_images EI', 'EI.event_id=EM.event_id AND EI.is_default="1"', 'LEFT');
         $this->db->where('EM.event_is_deleted', 'no');
-        $this->db->where('EM.event_start_date_time >= ', date("Y-m-d H:i:s"));
+        // $this->db->where('EM.event_start_date_time >= ', date("Y-m-d H:i:s"));
         // $this->db->where_or('EM.event_end_date_time <= ', date("Y-m-d H:i:s"));
         $this->db->group_by('EM.event_id,EM.event_title,EM.event_start_date_time,EM.event_end_date_time');
         $this->db->order_by('EM.event_start_date_time', 'ASC');
         $this->db->limit(3);
+        // $this->db->get();
+        // echo $this->db->last_query();
         return $this->db->get()->result();
     }
     public function getDataForEvent()

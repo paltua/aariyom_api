@@ -36,8 +36,12 @@ class Home extends CI_Controller
         // Configure limits on our controller methods
         // Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
         $this->methods['index_get']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['index_fu_get']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['index_event_get']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['index_program_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['get_event_all_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['get_event_details_get']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['get_all_programs_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->load->model('tbl_generic_model');
         $this->load->model('event_model');
         $this->load->model('fu_model');
@@ -58,6 +62,41 @@ class Home extends CI_Controller
         $this->response($responseData,  200); // OK (200) being the HTTP response code
     }
 
+    public function index_fu_get()
+    {
+        $this->data = $this->fu_model->getDataForHome();
+        $responseData = [
+            'status' => 'success',
+            'message' => '',
+            'data' => $this->data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function index_event_get()
+    {
+        $this->data = $this->event_model->getDataForHome();
+        $responseData = [
+            'status' => 'success',
+            'message' => '',
+            'data' => $this->data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function index_program_get()
+    {
+        $this->data = $this->programme_model->getDataForHome();
+        $responseData = [
+            'status' => 'success',
+            'message' => '',
+            'data' => $this->data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
 
     public function get_event_all_get()
     {
@@ -80,6 +119,18 @@ class Home extends CI_Controller
             'status' => 'success',
             'message' => '',
             'data' => $this->data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function get_all_programs_get()
+    {
+        $details = $this->programme_model->getData();
+        $responseData = [
+            'status' => 'success',
+            'message' => '',
+            'data' => $details
         ];
         // $retData = AUTHORIZATION::generateToken($responseData);
         $this->response($responseData,  200); // OK (200) being the HTTP response code
