@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Welcome extends CI_Controller {
+class Welcome extends CI_Controller
+{
 
 	/**
 	 * Index Page for this controller.
@@ -21,5 +22,19 @@ class Welcome extends CI_Controller {
 	public function index()
 	{
 		$this->load->view('welcome_message');
+	}
+
+	public function parrot()
+	{
+		$responseData = [
+			'status' => 'success',
+			'message' => 'Fetched successfully.',
+			'data' => array(
+				base_url('images/parrot/') . 'a1.jpeg',
+				base_url('images/parrot/') . 'a2.jpeg',
+				base_url('images/parrot/') . 'a3.jpeg',
+			)
+		];
+		echo json_encode($responseData);
 	}
 }
