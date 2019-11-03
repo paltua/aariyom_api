@@ -15,7 +15,7 @@ class Fu_model extends CI_Model
     public function admin_list($postData = [])
     {
         $image_url = $this->image_url;
-        $this->db->select("*, CONCAT('" . $image_url . "',IF(FU.fu_image!='',FU.fu_image,'no-image.png')) image_path");
+        $this->db->select("FU.*, CONCAT('" . $image_url . "',IF(FU.fu_image!='',FU.fu_image,'no-image.png')) image_path");
         $this->db->from('functional_units FU');
         $this->db->where('FU.fu_is_deleted', 'no');
         $this->whereAndLimit($postData);

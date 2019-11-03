@@ -80,7 +80,9 @@ class Fu extends CI_Controller
             if ($fData['error'] === "") {
                 $inData['fu_title'] = $inLogData['fu_title'] = $this->data['fu_title'];
                 $inData['fu_desc'] = $inLogData['fu_desc'] = $this->data['fu_desc'];
-                // $inData['fu_objectives'] = $inLogData['fu_objectives'] = $this->data['fu_objectives'];
+                $inData['fu_status'] = $inLogData['fu_status'] = $this->data['fu_status'];
+                $inData['fu_managed_by'] = $inLogData['fu_managed_by'] = $this->data['fu_managed_by'];
+                $inData['fu_operating_location'] = $inLogData['fu_operating_location'] = $this->data['fu_operating_location'];
                 $inData['fu_image'] = $inLogData['fu_image'] = $fData['data']['file_name'];
                 $inLogData['fu_created_by'] = $this->data['fu_created_by'];
                 $fu_id = $this->tbl_generic_model->add('functional_units', $inData);
@@ -156,11 +158,14 @@ class Fu extends CI_Controller
         if ($this->form_validation->run() === TRUE) {
             $inData = array();
             $fData['error'] = '';
+            $inData['fu_image'] = '';
+            $uploadStatus = 0;
             if ($_FILES) {
+                $uploadStatus = 1;
                 $fData = $this->do_upload();
                 $inData['fu_image'] = $inLogData['fu_image'] = $fData['data']['file_name'];
             } else {
-                $inLogData['fu_image'] = $this->data['old_image_name'];
+                $inData['fu_image'] = $inLogData['fu_image'] = $this->data['old_image_name'];
             }
 
             // Set the response and exit
@@ -168,11 +173,14 @@ class Fu extends CI_Controller
                 $whereData['fu_id'] = $fu_id = $this->data['fu_id'];
                 $inData['fu_title'] = $inLogData['fu_title'] = $this->data['fu_title'];
                 $inData['fu_desc'] = $inLogData['fu_desc'] = $this->data['fu_desc'];
+                $inData['fu_status'] = $inLogData['fu_status'] = $this->data['fu_status'];
+                $inData['fu_managed_by'] = $inLogData['fu_managed_by'] = $this->data['fu_managed_by'];
+                $inData['fu_operating_location'] = $inLogData['fu_operating_location'] = $this->data['fu_operating_location'];
                 $inLogData['fu_created_by'] = $this->data['fu_created_by'];
                 $this->tbl_generic_model->edit('functional_units', $inData, $whereData);
                 $inLogData['fu_id'] = $fu_id;
                 $this->tbl_generic_model->add('functional_units_log', $inLogData);
-                if ($this->data['old_image_name'] !== '') {
+                if ($this->data['old_image_name'] !== '' && $uploadStatus === 1) {
                     $this->tbl_generic_model->unlinkImage('./images/fus/' . $this->data['old_image_name']);
                 }
                 $responseData = [
