@@ -38,6 +38,7 @@ class Home extends CI_Controller
         $this->methods['index_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['index_fu_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['index_event_get']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['index_event_slider_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['index_program_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['get_event_all_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['get_event_details_get']['limit'] = 500; // 500 requests per hour per user/key
@@ -77,6 +78,18 @@ class Home extends CI_Controller
     public function index_event_get()
     {
         $this->data = $this->event_model->getDataForHome();
+        $responseData = [
+            'status' => 'success',
+            'message' => '',
+            'data' => $this->data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function index_event_slider_get()
+    {
+        $this->data = $this->event_model->getDataForHomeSlider();
         $responseData = [
             'status' => 'success',
             'message' => '',
