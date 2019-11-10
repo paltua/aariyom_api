@@ -93,4 +93,4 @@ INSERT INTO `settings` (`page`, `key_name`, `key_value`) VALUES ('about_us', 'im
 
 
 
-
+-- updated in live server

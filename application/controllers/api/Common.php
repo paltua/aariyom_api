@@ -106,6 +106,22 @@ class Common extends CI_Controller
         $this->response($responseData,  200); // OK (200) being the HTTP response code
     }
 
+    public function fu_list_get()
+    {
+        // India 96
+        $where['fu_is_deleted'] = 'no';
+        $select = '*';
+        $orderBy['fu_title'] = 'ASC';
+        $data = $this->tbl_generic_model->get('functional_units', $select, $where, $orderBy);
+        $responseData = [
+            'status' => 'success',
+            'message' => count($data) > 0 ? '' : 'No data please.',
+            'data' => $data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
     public function dashboard_details_get()
     {
         $data[0] = [];

@@ -70,6 +70,7 @@ class Programme extends CI_Controller
             'program_title' => $this->post('program_title'),
             'program_desc' => $this->post('program_desc'),
             'created_by' => $this->post('created_by'),
+            'program_status' => $this->post('program_status'),
         ];
         $this->form_validation->set_data($data);
         $this->form_validation->set_rules('program_title', 'Title', 'trim|required');
@@ -80,6 +81,7 @@ class Programme extends CI_Controller
                 $postData = $data;
                 $postData['program_image'] = $fData['data']['file_name'];
                 $insertId = $this->tbl_generic_model->add($this->table, $postData);
+                $this->insertFuList($insertId);
                 // Set the response and exit
                 if ($insertId > 0) {
                     $responseData = [
@@ -127,6 +129,7 @@ class Programme extends CI_Controller
             'program_title' => $this->post('program_title'),
             'program_desc' => $this->post('program_desc'),
             'created_by' => $this->post('created_by'),
+            'program_status' => $this->post('program_status'),
         ];
         $this->form_validation->set_data($data);
         $this->form_validation->set_rules('program_title', 'Title', 'trim|required');
@@ -143,6 +146,7 @@ class Programme extends CI_Controller
             if ($fData['error'] === "") {
                 $where['program_id'] = $this->post('program_id');
                 $updateStatus = $this->tbl_generic_model->edit($this->table, $postData, $where);
+                $this->insertFuList($this->post('program_id'));
                 // Set the response and exit
                 if ($where['program_id'] > 0 && $updateStatus) {
                     $responseData = [
@@ -180,6 +184,25 @@ class Programme extends CI_Controller
             ];
             // $retData = AUTHORIZATION::generateToken($responseData);
             $this->response($responseData,  200); // OK (401) being the HTTP response code
+        }
+    }
+
+    private function insertFuList($program_id = 0)
+    {
+        $fuList = $this->post('org_by');
+        if ($program_id > 0) {
+            if ($fuList != '') {
+                $this->tbl_generic_model->delete('programs_fus_rel', array('program_id' => $program_id));
+                $insertData = [];
+                $fuListArr = explode(',', $fuList);
+                foreach ($fuListArr as $value) {
+                    $insertData[] = [
+                        'program_id' => $program_id,
+                        'fu_id' => $value,
+                    ];
+                }
+                $this->tbl_generic_model->add_batch('programs_fus_rel', $insertData);
+            }
         }
     }
 

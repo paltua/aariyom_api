@@ -70,10 +70,15 @@ class Programme_model extends CI_Model
 
     public function geSingle($program_id = 0)
     {
-        $this->db->select('PROG.*,CONCAT("' . $this->image_url . '",IF(PROG.program_image!="",PROG.program_image,"no-image.png")) image_path');
+        $this->db->select('PROG.program_id,PROG.program_title,PROG.program_desc,PROG.program_image,PROG.program_status');
+        $this->db->select('CONCAT("' . $this->image_url . '",IF(PROG.program_image!="",PROG.program_image,"no-image.png")) image_path');
+        $this->db->select('FU.fu_id');
         $this->db->from('programs PROG');
+        $this->db->join('programs_fus_rel PFR', 'PFR.program_id=PROG.program_id', 'LEFT');
+        $this->db->join('functional_units FU', 'FU.fu_id=PFR.fu_id AND FU.fu_is_deleted = "no"', 'LEFT');
         $this->db->where('PROG.is_deleted', 'no');
         $this->db->where('PROG.program_id', $program_id);
+        // $this->db->group_by('PROG.program_id,PROG.program_title,PROG.program_desc,PROG.program_image,PROG.program_status');
         return $this->db->get()->result();
     }
 

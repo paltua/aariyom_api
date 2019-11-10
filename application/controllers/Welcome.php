@@ -33,6 +33,8 @@ class Welcome extends CI_Controller
 				base_url('images/parrot/') . 'a1.jpeg',
 				base_url('images/parrot/') . 'a2.jpeg',
 				base_url('images/parrot/') . 'a3.jpeg',
+				base_url('images/parrot/') . 'a4.jpeg',
+				base_url('images/parrot/') . 'a5.jpeg',
 			)
 		];
 		echo json_encode($responseData);
