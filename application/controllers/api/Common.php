@@ -40,6 +40,8 @@ class Common extends CI_Controller
         $this->methods['city_list_get']['limit'] = 1000; // 100 requests per hour per user/key
         $this->methods['programme_list_get']['limit'] = 1000;
         $this->methods['dashboard_details_get']['limit'] = 1000;
+        $this->methods['settings_get']['limit'] = 1000;
+        $this->methods['settings_update_post']['limit'] = 1000;
         $this->load->model('tbl_generic_model');
     }
 
@@ -148,6 +150,49 @@ class Common extends CI_Controller
         // $where = [];
         // $where['is_deleted'] = 'no';
         // $programs = $this->tbl_generic_model->countWhere('programs', $where);
+        $responseData = [
+            'status' => 'success',
+            'message' => count($data) > 0 ? '' : 'No data please.',
+            'data' => $data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function settings_get()
+    {
+        // West Bengal 1627
+        $where['page'] = $this->uri->segment(4);
+        $select = '*';
+        $orderBy = [];
+        $dbData = $this->tbl_generic_model->get('settings', $select, $where, $orderBy);
+        $data = [];
+        if (count($dbData) > 0) {
+            foreach ($dbData as $key => $value) {
+                $data[$value->key_name] = $value->key_value;
+            }
+        }
+        $responseData = [
+            'status' => 'success',
+            'message' => count($data) > 0 ? '' : 'No data please.',
+            'data' => $data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function settings_update_post()
+    {
+        // West Bengal 1627
+        $where['page'] = $this->uri->segment(4);
+        $data = [];
+        $dbData = $this->tbl_generic_model->edit('settings', $where, $data);
+        $data = [];
+        if (count($dbData) > 0) {
+            foreach ($dbData as $key => $value) {
+                $data[$value->key_name] = $value->key_value;
+            }
+        }
         $responseData = [
             'status' => 'success',
             'message' => count($data) > 0 ? '' : 'No data please.',
