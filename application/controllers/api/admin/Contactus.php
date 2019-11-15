@@ -36,6 +36,7 @@ class Contactus extends CI_Controller
 
         // Configure limits on our controller methods
         // Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
+        $this->methods['add_post']['limit'] = 500; // 100 requests per hour per user/key
         $this->methods['update_post']['limit'] = 500; // 100 requests per hour per user/key
         $this->methods['single_get']['limit'] = 500; // 100 requests per hour per user/key
         $this->methods['list_post']['limit'] = 500; // 100 requests per hour per user/key
@@ -43,6 +44,42 @@ class Contactus extends CI_Controller
         $this->load->model('tbl_generic_model');
         $this->load->model('contactus_model');
         $this->table = 'event_master';
+    }
+
+    public function add_post()
+    {
+        $this->load->library('form_validation');
+        $this->data = $this->post();
+        $this->form_validation->set_data($this->data);
+        $this->form_validation->set_rules('firstName', 'First Name', 'trim|required');
+        $this->form_validation->set_rules('lastName', 'Last Name', 'trim|required');
+        $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
+        $this->form_validation->set_rules('mobile', 'Mobile', 'trim|required');
+        $this->form_validation->set_rules('desccription', 'Message', 'trim|required');
+        if ($this->form_validation->run() === TRUE) {
+            $inData['name'] = $this->data['firstName'] . ' ' . $this->data['lastName'];
+            $inData['email'] = $this->data['email'];
+            $inData['mobile'] = $this->data['mobile'];
+            $inData['desccription'] = $this->data['desccription'];
+            $this->tbl_generic_model->add('contact_us', $inData);
+            $responseData = [
+                'status' => 'success',
+                'message' => 'Added successfully.',
+                'data' => []
+            ];
+
+            // $retData = AUTHORIZATION::generateToken($responseData);
+            $this->response($responseData,  200); // OK (200) being the HTTP response code
+        } else {
+            // Set the response and exit
+            $responseData = [
+                'status' => 'danger',
+                'message' => validation_errors(),
+                'data' => [],
+            ];
+            // $retData = AUTHORIZATION::generateToken($responseData);
+            $this->response($responseData,  200); // OK (401) being the HTTP response code
+        }
     }
 
     public function update_post()
