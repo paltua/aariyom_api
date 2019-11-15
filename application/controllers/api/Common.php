@@ -183,20 +183,17 @@ class Common extends CI_Controller
 
     public function settings_update_post()
     {
-        // West Bengal 1627
-        $where['page'] = $this->uri->segment(4);
-        $data = [];
-        $dbData = $this->tbl_generic_model->edit('settings', $where, $data);
-        $data = [];
-        if (count($dbData) > 0) {
-            foreach ($dbData as $key => $value) {
-                $data[$value->key_name] = $value->key_value;
+        foreach ($this->post() as $key => $value) {
+            if ($key !== 'page') {
+                $where['key_name'] = $key;
+                $data['key_value'] = $value;
+                $this->tbl_generic_model->edit('settings', $data, $where);
             }
         }
         $responseData = [
             'status' => 'success',
-            'message' => count($data) > 0 ? '' : 'No data please.',
-            'data' => $data
+            'message' => 'updated',
+            'data' => [$where, $data]
         ];
         // $retData = AUTHORIZATION::generateToken($responseData);
         $this->response($responseData,  200); // OK (200) being the HTTP response code

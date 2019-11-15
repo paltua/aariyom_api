@@ -90,6 +90,8 @@ INSERT INTO `settings` (`page`, `key_name`, `key_value`) VALUES ('about_us', 'wh
 INSERT INTO `settings` (`page`, `key_name`, `key_value`) VALUES ('about_us', 'our_mission', 'Integer laoreet semper dui nec viverra. Cras nibh ligula, aliquam quis sollicitudin euPellentesque habitant morbi tristique senectus et netus et malesuada famesInteger laoreet semper dui nec viverra. Cras nibh ligula, aliquam quis sollicitudin euPellentesque habitant morbi tristique senectus et netus et malesuada famesPellentesque habitant morbi tristique senectus et netus et malesuada famesInteger laoreet semper dui nec viverra. Cras nibh ligula, aliquam quis sollicitudin eu');
 INSERT INTO `settings` (`page`, `key_name`, `key_value`) VALUES ('about_us', 'image', 'test.png');
 
+ALTER TABLE `settings` 
+ADD UNIQUE INDEX `key_name_UNIQUE` (`key_name` ASC);
 
 
 
