@@ -75,7 +75,10 @@ class Fu extends CI_Controller
         $this->form_validation->set_rules('fu_desc', 'Description', 'trim|required');
         // $this->form_validation->set_rules('fu_image_name', 'Image', 'trim|required');
         if ($this->form_validation->run() === TRUE) {
-            $fData = $this->do_upload();
+            $fData['error'] = '';
+            if ($_FILES) {
+                $fData = $this->do_upload();
+            }
             // Set the response and exit
             if ($fData['error'] === "") {
                 $inData['fu_title'] = $inLogData['fu_title'] = $this->data['fu_title'];
@@ -83,7 +86,11 @@ class Fu extends CI_Controller
                 $inData['fu_status'] = $inLogData['fu_status'] = $this->data['fu_status'];
                 $inData['fu_managed_by'] = $inLogData['fu_managed_by'] = $this->data['fu_managed_by'];
                 $inData['fu_operating_location'] = $inLogData['fu_operating_location'] = $this->data['fu_operating_location'];
-                $inData['fu_image'] = $inLogData['fu_image'] = $fData['data']['file_name'];
+                if ($_FILES) {
+                    $inData['fu_image'] = $inLogData['fu_image'] = $fData['data']['file_name'];
+                } else {
+                    $inData['fu_image'] = '';
+                }
                 $inLogData['fu_created_by'] = $this->data['fu_created_by'];
                 $fu_id = $this->tbl_generic_model->add('functional_units', $inData);
                 $inLogData['fu_id'] = $fu_id;
@@ -116,6 +123,10 @@ class Fu extends CI_Controller
 
     public function do_upload()
     {
+        $retData = [];
+        $retData['data'] = '';
+        $retData['error'] = '';
+
         $config['upload_path']          = './images/fus/';
         $new_name                   = time() . '.' . pathinfo($_FILES["fu_image_name"]['name'], PATHINFO_EXTENSION);
         $config['file_name']        = $new_name;
@@ -124,7 +135,7 @@ class Fu extends CI_Controller
         // $config['max_width']            = 1200;
         // $config['max_height']           = 400;
         $this->load->library('upload', $config);
-        $retData = [];
+
         if (!$this->upload->do_upload('fu_image_name')) {
             $retData['error'] = $this->upload->display_errors();
             $retData['data'] = $this->upload->data();
@@ -132,6 +143,8 @@ class Fu extends CI_Controller
             $retData['data'] = $this->upload->data();
             $retData['error'] = '';
         }
+
+
         return $retData;
     }
 

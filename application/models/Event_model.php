@@ -96,7 +96,7 @@ class Event_model extends CI_Model
         $this->db->select("CONCAT('" . $this->image_url . "',IF(EI.ei_image_name!='',EI.ei_image_name,'no-image.png')) image_path ", false);
         $this->db->from('event_images EI');
         $this->db->where('EI.event_id', $event_id);
-        $this->db->order_by('EI.ei_id', 'DESC');
+        $this->db->order_by('EI.is_default', 'ASC');
         return $this->db->get()->result();
     }
 
