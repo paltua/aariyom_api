@@ -234,4 +234,14 @@ class Tbl_generic_model extends CI_Model
         }
         return true;
     }
+
+    public function getAboutUsData(){
+        $image_url = base_url('images/about-us/');
+        $this->db->select('*');
+        $this->db->select("IF(key_name='image',CONCAT('" . $image_url . "',key_value),'')", 'image_path_new');
+        $this->db->from('settings');
+        $this->db->where('page', 'about_us');
+        // echo $this->db->last_query();
+        return $this->db->get()->result();
+    }
 }

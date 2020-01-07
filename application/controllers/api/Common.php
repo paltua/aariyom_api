@@ -26,7 +26,7 @@ class Common extends CI_Controller
     use REST_Controller {
         REST_Controller::__construct as private __resTraitConstruct;
     }
-
+    public $imagePath = './images/about-us/';
     function __construct()
     {
         // Construct the parent class
@@ -165,13 +165,20 @@ class Common extends CI_Controller
         $where['page'] = $this->uri->segment(4);
         $select = '*';
         $orderBy = [];
-        $dbData = $this->tbl_generic_model->get('settings', $select, $where, $orderBy);
         $data = [];
+        $dbData = $this->tbl_generic_model->get('settings', $select, $where, $orderBy);
         if (count($dbData) > 0) {
             foreach ($dbData as $key => $value) {
-                $data[$value->key_name] = $value->key_value;
+                if($value->key_name === 'image'){
+                    $data[$value->key_name] = $value->key_value;
+                    $data['image_path'] = base_url('images/about-us/').$value->key_value;
+                }else{
+                    $data[$value->key_name] = $value->key_value;
+                }
             }
         }
+        
+        
         $responseData = [
             'status' => 'success',
             'message' => count($data) > 0 ? '' : 'No data please.',
@@ -185,9 +192,18 @@ class Common extends CI_Controller
     {
         foreach ($this->post() as $key => $value) {
             if ($key !== 'page') {
-                $where['key_name'] = $key;
-                $data['key_value'] = $value;
-                $this->tbl_generic_model->edit('settings', $data, $where);
+                if($key !== 'old_image'){
+                    $where['key_name'] = $key;
+                    $data['key_value'] = $value;
+                    $this->tbl_generic_model->edit('settings', $data, $where);
+                }else{
+                    $imageData = $this->uploadSettingsImage('about-us', $value);
+                    if($imageData['error'] === ""){
+                        $where['key_name'] = 'image';
+                        $data['key_value'] = $imageData['data']['file_name'];
+                        $this->tbl_generic_model->edit('settings', $data, $where);
+                    }
+                }
             }
         }
         $responseData = [
@@ -197,5 +213,26 @@ class Common extends CI_Controller
         ];
         // $retData = AUTHORIZATION::generateToken($responseData);
         $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    private function uploadSettingsImage($page = 'about-us', $imageData = ''){
+        $event_id = 1;
+        $config['upload_path']          = $this->imagePath;
+        $new_name                   = $event_id . '_' . time() . '.' . pathinfo($_FILES["image"]['name'], PATHINFO_EXTENSION);
+        $config['file_name']        = $new_name;
+        $config['allowed_types']        = 'jpeg|gif|jpg|png';
+        // $config['max_size']             = 1024;
+        // $config['max_width']            = 1200;
+        // $config['max_height']           = 400;
+        $this->load->library('upload', $config);
+        $retData = [];
+        if (!$this->upload->do_upload('image')) {
+            $retData['error'] = $this->upload->display_errors();
+            $retData['data'] = $this->upload->data();
+        } else {
+            $retData['data'] = $this->upload->data();
+            $retData['error'] = '';
+        }
+        return $retData;
     }
 }
