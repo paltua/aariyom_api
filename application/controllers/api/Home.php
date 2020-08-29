@@ -43,6 +43,8 @@ class Home extends CI_Controller
         $this->methods['get_event_all_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['get_event_details_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->methods['get_all_programs_get']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['getUpcomingEvent_get']['limit'] = 500; // 500 requests per hour per user/key
+        $this->methods['getArchive_get']['limit'] = 500; // 500 requests per hour per user/key
         $this->load->model('tbl_generic_model');
         $this->load->model('event_model');
         $this->load->model('fu_model');
@@ -144,6 +146,28 @@ class Home extends CI_Controller
             'status' => 'success',
             'message' => '',
             'data' => $details
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function getUpcomingEvent_get(){
+        $this->data['list'] = $this->event_model->getUpcomingEvent();
+        $responseData = [
+            'status' => 'success',
+            'message' => '',
+            'data' => $this->data
+        ];
+        // $retData = AUTHORIZATION::generateToken($responseData);
+        $this->response($responseData,  200); // OK (200) being the HTTP response code
+    }
+
+    public function getArchive_get(){
+        $this->data['list'] = $this->event_model->getArchive();
+        $responseData = [
+            'status' => 'success',
+            'message' => '',
+            'data' => $this->data
         ];
         // $retData = AUTHORIZATION::generateToken($responseData);
         $this->response($responseData,  200); // OK (200) being the HTTP response code
