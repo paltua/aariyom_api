@@ -52,7 +52,20 @@ ALTER TABLE `event_master_log`
 CHANGE COLUMN `eml_id` `eml_id` BIGINT(20) NOT NULL AUTO_INCREMENT ;
 
 ALTER TABLE `programs` 
-ADD COLUMN `pro_fus_custom_name` VARCHAR(255) NULL AFTER `program_status`;
+ADD COLUMN `org_by_custom_name` VARCHAR(255) NULL AFTER `program_status`;
+
+ALTER TABLE `programs` 
+DROP COLUMN `program_image`;
+
+ALTER TABLE `programs` 
+ADD COLUMN `program_about` LONGTEXT NULL AFTER `org_by_custom_name`,
+ADD COLUMN `program_objectives` LONGTEXT NULL AFTER `program_about`;
+
+ALTER TABLE `programs` 
+ADD COLUMN `pro_title_url` VARCHAR(255) NULL AFTER `program_objectives`;
+
+
+
 
 
 
