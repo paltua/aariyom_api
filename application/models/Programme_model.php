@@ -8,12 +8,12 @@ class Programme_model extends CI_Model {
     function __construct() {
         // parent::__construct();
         $this->table = 'programs';
-        $this->image_url = base_url( 'images/programs/' );
+        $this->image_url = base_url( IMAGE_PATH__PROG );
     }
 
     public function admin_list( $postData = [] ) {
         $this->db->select( 'PROG.*,CONCAT("' . $this->image_url . '",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path, UMD.user_name' );
-        // $this->db->select( 'PROG.*,UMD.user_name' );
+        $this->db->select( 'CONCAT("' . $this->image_url . 'thumb/",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path_thumb', false );
         $this->db->from( 'programs PROG' );
         $this->db->join( 'user_master UM', 'UM.user_id=PROG.created_by', 'inner' );
         $this->db->join( 'user_master_details UMD', 'UMD.user_id=UM.user_id', 'inner' );
@@ -69,6 +69,7 @@ class Programme_model extends CI_Model {
         $this->db->select( 'PROG.*' );
         // $this->db->select( 'PROG.program_id,PROG.program_title,PROG.program_desc,PROG.program_image,PROG.program_status' );
         $this->db->select( 'CONCAT("' . $this->image_url . '",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path' );
+        $this->db->select( 'CONCAT("' . $this->image_url . 'thumb/",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path_thumb', false );
         $this->db->select( 'FU.fu_id' );
         $this->db->from( 'programs PROG' );
         $this->db->join( 'programs_fus_rel PFR', 'PFR.program_id=PROG.program_id', 'LEFT' );
@@ -83,6 +84,7 @@ class Programme_model extends CI_Model {
     public function getImages( $program_id = 0 ) {
         $this->db->select( 'PROIMG.*' );
         $this->db->select( "CONCAT('" . $this->image_url . "',IF(PROIMG.prog_img_name!='',PROIMG.prog_img_name,'no-image.png')) image_path ", false );
+        $this->db->select( 'CONCAT("' . $this->image_url . 'thumb/",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path_thumb', false );
         $this->db->from( 'programs_images PROIMG' );
         $this->db->where( 'PROIMG.program_id', $program_id );
         $this->db->order_by( 'PROIMG.is_default', 'ASC' );
@@ -91,6 +93,7 @@ class Programme_model extends CI_Model {
 
     public function getDataForHome() {
         $this->db->select( 'PROG.*,CONCAT("' . $this->image_url . '",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path' );
+        $this->db->select( 'CONCAT("' . $this->image_url . 'thumb/",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path_thumb', false );
         $this->db->from( 'programs PROG' );
         $this->db->join( 'programs_images PROIMG', 'PROIMG.program_id=PROG.program_id AND PROIMG.is_default = "1"', 'LEFT' );
         $this->db->where( 'PROG.is_deleted', 'no' );
@@ -100,10 +103,23 @@ class Programme_model extends CI_Model {
 
     public function getData() {
         $this->db->select( 'PROG.*,CONCAT("' . $this->image_url . '",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path' );
+        $this->db->select( 'CONCAT("' . $this->image_url . 'thumb/",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path_thumb', false );
         $this->db->from( 'programs PROG' );
         $this->db->join( 'programs_images PROIMG', 'PROIMG.program_id=PROG.program_id AND PROIMG.is_default = "1"', 'LEFT' );
         $this->db->where( 'PROG.is_deleted', 'no' );
         $this->db->order_by( 'PROG.program_id', 'DESC' );
+        return $this->db->get()->result();
+    }
+
+    public function geSingleFrontEnd( $program_id = 0 ) {
+        $this->db->select( 'PROG.*,FU.*' );
+        $this->db->from( 'programs PROG' );
+        $this->db->join( 'programs_fus_rel PFR', 'PFR.program_id=PROG.program_id', 'INNER' );
+        $this->db->join( 'functional_units FU', 'FU.fu_id=PFR.fu_id AND FU.fu_is_deleted = "no"', 'LEFT' );
+        $this->db->where( 'PROG.is_deleted', 'no' );
+        $this->db->where( 'PROG.program_id', $program_id );
+        // $this->db->get();
+        // echo $this->db->last_query();
         return $this->db->get()->result();
     }
 }

@@ -27,7 +27,7 @@ class Programme extends CI_Controller {
         REST_Controller::__construct as private __resTraitConstruct;
     }
     public $table = '';
-    public $imagePath = './images/programs/';
+    public $imagePath = './'.IMAGE_PATH__PROG;
 
     function __construct() {
         // Construct the parent class
@@ -83,10 +83,11 @@ class Programme extends CI_Controller {
             'program_about' => $this->post( 'program_about' ),
             'program_objectives' => $this->post( 'program_objectives' ),
             'org_by_custom_name' => $this->post( 'org_by_custom_name' ),
+            'program_short_desc' => $this->post( 'program_short_desc' ),
         ];
         $this->form_validation->set_data( $data );
         $this->form_validation->set_rules( 'program_title', 'Title', 'trim|required' );
-        $this->form_validation->set_rules( 'program_desc', 'Description', 'trim|required' );
+        $this->form_validation->set_rules( 'program_short_desc', 'Short Description', 'trim|required' );
         if ( $this->form_validation->run() === TRUE ) {
 
             $postData = $data;
@@ -138,10 +139,11 @@ class Programme extends CI_Controller {
             'program_about' => $this->post( 'program_about' ),
             'program_objectives' => $this->post( 'program_objectives' ),
             'org_by_custom_name' => $this->post( 'org_by_custom_name' ),
+            'program_short_desc' => $this->post( 'program_short_desc' ),
         ];
         $this->form_validation->set_data( $data );
         $this->form_validation->set_rules( 'program_title', 'Title', 'trim|required' );
-        $this->form_validation->set_rules( 'program_desc', 'Description', 'required' );
+        $this->form_validation->set_rules( 'program_short_desc', 'Short Description', 'trim|required' );
         if ( $this->form_validation->run() === TRUE ) {
             $postData = $data;
 
@@ -259,23 +261,45 @@ class Programme extends CI_Controller {
     }
 
     public function do_upload() {
-        $config['upload_path']          = $this->imagePath;
+        $config['upload_path']      = $this->imagePath;
         $new_name                   = time() . '.' . pathinfo( $_FILES['program_image']['name'], PATHINFO_EXTENSION );
         $config['file_name']        = $new_name;
-        $config['allowed_types']        = 'jpeg|gif|jpg|png';
+        $config['allowed_types']    = 'jpeg|gif|jpg|png';
         // $config['max_size']             = 1024;
-        // $config['max_width']            = 1200;
-        // $config['max_height']           = 400;
+        $config['max_width']        = 1000;
+        $config['max_height']       = 500;
         $this->load->library( 'upload', $config );
         $retData = [];
         if ( !$this->upload->do_upload( 'program_image' ) ) {
             $retData['error'] = $this->upload->display_errors();
             $retData['data'] = $this->upload->data();
         } else {
-            $retData['data'] = $this->upload->data();
+            $retData['data'] = $path = $this->upload->data();
+            $this->_resizeImage( $path['file_name'] );
             $retData['error'] = '';
         }
         return $retData;
+    }
+
+    private function _resizeImage( $imageName = '' ) {
+        // echo '<pre>';
+        // print_r( $imageName );
+        $config['image_library'] = 'gd2';
+        $config['source_image'] = $this->imagePath.$imageName;
+        $config['new_image'] = $this->imagePath.'thumb';
+        $config['create_thumb'] = FALSE;
+        $config['maintain_ratio'] = TRUE;
+        $config['width']         = 250;
+        $config['height']       = 125;
+        $this->load->library( 'image_lib' );
+        $this->image_lib->initialize( $config );
+        $this->image_lib->resize();
+        // if ( $this->image_lib->resize() ) {
+        //     echo 'success';
+        // } else {
+        //     echo $this->image_lib->display_errors();
+        // }
+        // die;
     }
 
     public function image_upload_post() {
