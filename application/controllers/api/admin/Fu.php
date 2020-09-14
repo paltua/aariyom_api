@@ -150,23 +150,24 @@ class Fu extends CI_Controller {
             $retData['data'] = $this->upload->data();
         } else {
             $retData['data'] = $path = $this->upload->data();
-            $this->_resizeImage( $path['file_name'] );
+            $this->_resizeImage( $path['file_name'], '1000', '500', '' );
+            $this->_resizeImage( $path['file_name'], '300', '150', 'thumb' );
             $retData['error'] = '';
         }
 
         return $retData;
     }
 
-    private function _resizeImage( $imageName = '' ) {
+    private function _resizeImage( $imageName = '', $width = '1000', $height = '500', $folder = '' ) {
         // echo '<pre>';
         // print_r( $imageName );
         $config['image_library'] = 'gd2';
         $config['source_image'] = $this->imagePath.$imageName;
-        $config['new_image'] = $this->imagePath.'thumb';
+        $config['new_image'] = $this->imagePath.$folder;
         $config['create_thumb'] = FALSE;
         $config['maintain_ratio'] = TRUE;
-        $config['width']         = 250;
-        $config['height']       = 125;
+        $config['width']         = $width;
+        $config['height']       = $height;
         $this->load->library( 'image_lib' );
         $this->image_lib->initialize( $config );
         $this->image_lib->resize();

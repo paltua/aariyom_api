@@ -426,8 +426,8 @@ class Event extends CI_Controller {
         $config['file_name']        = $new_name;
         $config['allowed_types']        = 'jpeg|gif|jpg|png';
         // $config['max_size']             = 1024;
-        $config['max_width']        = 1000;
-        $config['max_height']       = 500;
+        $config['min_width']        = 1000;
+        $config['min_height']       = 500;
         $this->load->library( 'upload', $config );
         $retData = [];
         if ( !$this->upload->do_upload( 'event_image' ) ) {
@@ -435,31 +435,26 @@ class Event extends CI_Controller {
             $retData['data'] = $this->upload->data();
         } else {
             $retData['data'] = $path = $this->upload->data();
-            $this->_resizeImage( $path['file_name'] );
+            $this->_resizeImage( $path['file_name'], '1000', '500', '' );
+            $this->_resizeImage( $path['file_name'], '250', '125', 'thumb' );
             $retData['error'] = '';
         }
         return $retData;
     }
 
-    private function _resizeImage( $imageName = '' ) {
+    private function _resizeImage( $imageName = '', $width = '1000', $height = '500', $folder = '' ) {
         // echo '<pre>';
         // print_r( $imageName );
         $config['image_library'] = 'gd2';
         $config['source_image'] = $this->imagePath.$imageName;
-        $config['new_image'] = $this->imagePath.'thumb';
+        $config['new_image'] = $this->imagePath.$folder;
         $config['create_thumb'] = FALSE;
         $config['maintain_ratio'] = TRUE;
-        $config['width']         = 250;
-        $config['height']       = 125;
+        $config['width']         = $width;
+        $config['height']       = $height;
         $this->load->library( 'image_lib' );
         $this->image_lib->initialize( $config );
         $this->image_lib->resize();
-        // if ( $this->image_lib->resize() ) {
-        //     echo 'success';
-        // } else {
-        //     echo $this->image_lib->display_errors();
-        // }
-        // die;
     }
 
     public function image_list_default_get() {
