@@ -141,8 +141,8 @@ class Fu extends CI_Controller {
         $config['file_name']        = $new_name;
         $config['allowed_types']    = 'jpeg|gif|jpg|png';
         // $config['max_size']             = 1024;
-        $config['max_width']            = 1000;
-        $config['max_height']           = 500;
+        $config['min_width']            = 500;
+        $config['min_height']           = 250;
         $this->load->library( 'upload', $config );
 
         if ( !$this->upload->do_upload( 'fu_image_name' ) ) {
@@ -159,8 +159,6 @@ class Fu extends CI_Controller {
     }
 
     private function _resizeImage( $imageName = '', $width = '1000', $height = '500', $folder = '' ) {
-        // echo '<pre>';
-        // print_r( $imageName );
         $config['image_library'] = 'gd2';
         $config['source_image'] = $this->imagePath.$imageName;
         $config['new_image'] = $this->imagePath.$folder;
@@ -171,12 +169,6 @@ class Fu extends CI_Controller {
         $this->load->library( 'image_lib' );
         $this->image_lib->initialize( $config );
         $this->image_lib->resize();
-        // if ( $this->image_lib->resize() ) {
-        //     echo 'success';
-        // } else {
-        //     echo $this->image_lib->display_errors();
-        // }
-        // die;
     }
 
     public function single_get() {

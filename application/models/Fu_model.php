@@ -87,4 +87,16 @@ class Fu_model extends CI_Model {
         $this->db->where( 'FU.fu_id', $fu_id );
         return $this->db->get()->result();
     }
+
+    public function getOthersFu( $fu_id = 0 ) {
+        $this->db->select( 'FU.*' );
+        $this->db->select( "CONCAT('" . $this->image_url . "',IF(FU.fu_image!='',FU.fu_image,'no-image.png')) image_path" );
+        $this->db->select( " CONCAT('" . $this->image_url . "thumb/',IF(FU.fu_image!='',FU.fu_image,'no-image.png')) image_path_thumb", false );
+        $this->db->from( 'functional_units FU' );
+        $this->db->where( 'FU.fu_is_deleted', 'no' );
+        $this->db->where( 'FU.fu_id != ', $fu_id );
+        $this->db->order_by( 'FU.fu_id', 'DESC' );
+        // $this->db->limit( 20 );
+        return $this->db->get()->result();
+    }
 }
