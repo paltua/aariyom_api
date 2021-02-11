@@ -227,14 +227,14 @@ class Home extends CI_Controller
     public function get_programme_details_get()
     {
         // West Bengal 1627
-        $programme_id = $this->uri->segment(4);
-        $data['details'] = $this->programme_model->geSingleFrontEnd($programme_id);
-        $programme_id = 0;
+        $pro_title_url = $this->uri->segment(4);
+        $data['details'] = $this->programme_model->geSingleFrontEnd($pro_title_url);
+        $program_id = 0;
         if ($data['details'][0]->program_id) {
-            $programme_id = $data['details'][0]->program_id;
+            $program_id = $data['details'][0]->program_id;
         }
 
-        $data['images'] = $this->programme_model->getImages($programme_id);
+        $data['images'] = $this->programme_model->getImages($program_id);
         $responseData = [
             'status' => 'success',
             'message' => count($data) > 0 ? '' : 'No data please.',
@@ -248,8 +248,8 @@ class Home extends CI_Controller
     public function get_fu_details_get()
     {
         // West Bengal 1627
-        $fu_id = $this->uri->segment(4);
-        $data['details'] = $this->fu_model->getSingleFrontEnd($fu_id);
+        $fu_title_url = $this->uri->segment(4);
+        $data['details'] = $this->fu_model->getSingleFrontEnd($fu_title_url);
         $responseData = [
             'status' => 'success',
             'message' => count($data) > 0 ? '' : 'No data please.',
@@ -263,8 +263,8 @@ class Home extends CI_Controller
     public function get_others_programme_get()
     {
         // West Bengal 1627
-        $id = $this->uri->segment(4);
-        $data = $this->programme_model->getOthersProgramme($id);
+        $pro_title_url = $this->uri->segment(4);
+        $data = $this->programme_model->getOthersProgramme($pro_title_url);
         $responseData = [
             'status' => 'success',
             'message' => count($data) > 0 ? '' : 'No data please.',

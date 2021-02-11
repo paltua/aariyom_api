@@ -210,7 +210,7 @@ class Event_model extends CI_Model
         return $this->db->get()->result();
     }
 
-    public function getEventDetails($event_id = '')
+    public function getEventDetails($event_title_url = '')
     {
         $this->db->select('EML.*');
         $this->db->select_min('EL.address', 'address');
@@ -241,7 +241,7 @@ class Event_model extends CI_Model
         $this->db->join('programs PRO', 'PRO.program_id = EPR.program_id AND PRO.is_deleted = "no"', 'LEFT');
         $this->db->join('event_images EI', 'EI.event_id=EM.event_id AND EI.is_default="1"', 'LEFT');
         $this->db->where('EML.event_status !=', 'deleted');
-        $this->db->where('EML.event_title_url', $event_id);
+        $this->db->where('EML.event_title_url', $event_title_url);
         // $this->db->group_by( 'EM.event_id,EM.event_title,EM.event_start_date_time,EM.event_end_date_time' );
         // $this->db->order_by( 'EM.event_start_date_time', 'DESC' );
         // $this->db->limit( 3 );

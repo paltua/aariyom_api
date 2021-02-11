@@ -121,7 +121,7 @@ class Programme_model extends CI_Model
         return $this->db->get()->result();
     }
 
-    public function geSingleFrontEnd($pro_title_url = 0)
+    public function geSingleFrontEnd($pro_title_url = '')
     {
         $this->db->select('PROG.*,FU.*');
         $this->db->from('programs PROG');
@@ -134,14 +134,14 @@ class Programme_model extends CI_Model
         return $this->db->get()->result();
     }
 
-    public function getOthersProgramme($program_id = 0)
+    public function getOthersProgramme($pro_title_url = 0)
     {
         $this->db->select('PROG.*,CONCAT("' . $this->image_url . '",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path');
         $this->db->select('CONCAT("' . $this->image_url . 'thumb/",IF(PROIMG.prog_img_name!="",PROIMG.prog_img_name,"no-image.png")) image_path_thumb', false);
         $this->db->from('programs PROG');
         $this->db->join('programs_images PROIMG', 'PROIMG.program_id=PROG.program_id AND PROIMG.is_default = "1"', 'LEFT');
         $this->db->where('PROG.is_deleted', 'no');
-        $this->db->where('PROG.program_id !=', $program_id);
+        $this->db->where('PROG.pro_title_url !=', $pro_title_url);
         // $this->db->get();
         // echo $this->db->last_query();
         return $this->db->get()->result();
