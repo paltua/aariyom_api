@@ -47,10 +47,16 @@ class Common extends CI_Controller
         $this->methods['dashboard_details_get']['limit'] = 1000;
         $this->methods['settings_get']['limit'] = 1000;
         $this->methods['settings_update_post']['limit'] = 1000;
+        $this->methods['add_settings_about_us_data_post']['limit'] = 1000;
+        $this->methods['get_settings_about_us_data_post']['limit'] = 1000;
+        $this->methods['get_settings_about_us_data_home_get']['limit'] = 1000;
+        $this->methods['update_about_us_img_youtube_settings_post']['limit'] = 1000;
+
         $this->load->model('tbl_generic_model');
         $this->load->model('event_model');
         $this->load->model('programme_model');
         $this->load->model('fu_model');
+        $this->load->model('contactus_model');
     }
 
     public function country_list_get()
@@ -254,5 +260,77 @@ class Common extends CI_Controller
             $retData['error'] = '';
         }
         return $retData;
+    }
+
+    public function add_settings_about_us_data_post()
+    {
+        // print_r($this->post());
+        $postData = $this->post();
+        $inData = [];
+        if ($postData['type'] == 'youtube') {
+            $inData["page"] = $postData["page"];
+            $inData["path"] = $postData["youtube"];
+            $inData["type"] = $postData["type"];
+            $this->tbl_generic_model->add('settings_midea_about_us', $inData);
+        } else {
+        }
+        $responseData = [
+            'status' => 'success',
+            'message' => 'added',
+            'data' => []
+        ];
+        // $retData = AUTHORIZATION::generateToken( $responseData );
+        $this->response($responseData,  200);
+        // OK ( 200 ) being the HTTP response code
+    }
+
+    public function get_settings_about_us_data_post()
+    {
+        $postData = $this->post();
+        $data = $this->contactus_model->admin_about_us_list($postData);
+        $pagingData = [
+            'recordsTotal' => $this->contactus_model->admin_about_us_list_count(),
+            'recordsFiltered' => $this->contactus_model->admin_about_us_list_filter_count($postData),
+            'list' => $data
+        ];
+        $responseData = [
+            'status' => 'success',
+            'message' => 'fetched',
+            'data' => $pagingData
+        ];
+        // $retData = AUTHORIZATION::generateToken( $responseData );
+        $this->response($responseData,  200);
+        // OK ( 200 ) being the HTTP response code
+    }
+
+    public function get_settings_about_us_data_home_get($page = 'about_us')
+    {
+        $data = $this->contactus_model->get_settings_about_us_data_home($page);
+        $responseData = [
+            'status' => 'success',
+            'message' => 'fetched',
+            'data' => $data
+        ];
+        // $retData = AUTHORIZATION::generateToken( $responseData );
+        $this->response($responseData,  200);
+    }
+
+    public function update_about_us_img_youtube_settings_post()
+    {
+        $data = $this->post();
+        if ($data['action'] == 'delete') {
+            $where['id'] = $data['id'];
+            $updata['status'] = 'deleted';
+            $this->tbl_generic_model->edit('settings_midea_about_us', $updata, $where);
+        } else {
+            $this->contactus_model->update_about_us_img_youtube_settings($data['id'], $data['action_val']);
+        }
+        $responseData = [
+            'status' => 'success',
+            'message' => 'updated',
+            'data' => []
+        ];
+        // $retData = AUTHORIZATION::generateToken( $responseData );
+        $this->response($responseData,  200);
     }
 }
