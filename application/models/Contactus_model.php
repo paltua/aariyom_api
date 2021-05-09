@@ -110,7 +110,9 @@ class Contactus_model extends CI_Model {
     }
 
     public function get_settings_about_us_data_home( $page = '' ) {
-        $this->db->select( '*, IF(type="image",CONCAT("' . $this->image_url_about_us . '",IF(path!="image",path,"")),"") image_path' );
+        $this->db->select( '*' );
+        $this->db->select( "CONCAT('" . $this->image_url_about_us . "',IF(type='image',path,'')) image_path" );
+        $this->db->select( " CONCAT('" . $this->image_url_about_us . "thumb/',IF(type='image',path,'')) image_path_thumb", false );
         $this->db->from( 'settings_midea_about_us' );
         $this->db->where( 'status', 'active' );
         $this->db->where( 'page', $page );
